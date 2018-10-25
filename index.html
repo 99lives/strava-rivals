@@ -1,0 +1,145 @@
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>Strava Rivals Pre Alpha</title>
+
+  <!--<link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css" integrity="sha384-nn4HPE8lTHyVtfCBi5yW9d20FjT8BJwUXyWZT9InLYax14RDjBj46LmSztkmNP9w" crossorigin="anonymous">
+  -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+    function ObjectId(s) {
+        return s.toString();
+    }
+    function NumberLong(s) {
+        return Number(s)
+    }
+
+    function ISODate(s) {
+        return s
+    }
+
+    var efforts = [];
+    var results = [];
+    function GetEffortsFromRival (r) {
+        for (effort in r.efforts){
+            efforts.push(effort);
+        }      
+    }
+    var totals = {r1:0, r2:0, draws:0}
+
+    function ProcessRivals (r1, r2) {
+        for (i in efforts){
+            e1 = r1.efforts[efforts[i]][0];
+            e2 = r2.efforts[efforts[i]][0];
+            var result = {e1:e1, e2:e2};
+            result.name = e1.name;
+            if (e1.elapsedtime == e2.elapsedtime){
+                result.winner = 0;
+                totals.draws++;
+            }else if (e1.elapsedtime < e2.elapsedtime){
+                result.winner = 1;
+                totals.r1++;
+            }else {
+                result.winner = 2;
+                totals.r2++;
+            }
+            
+           results.push(result);
+        }      
+    }
+
+    function formattime(t) {
+        var sec_num = parseInt(t, 10); // don't forget the second param
+        var hours   = Math.floor(sec_num / 3600);
+        var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+        var seconds = sec_num - (hours * 3600) - (minutes * 60);
+        var o = "";
+        //var hourst=hours.toString();
+        var minutest="";
+        var secondst="";
+
+        // if (hours   < 10) {hourst   = "0"+hours;}
+        // if (minutes < 10) {minutest = "0"+minutes;}
+        // if (seconds < 10) {secondst = "0"+seconds;}
+        if (hours > 0) o = hours+'h:';
+        if (minutes > 0) o += minutes+'m:';
+         o+= seconds+"s";
+
+        return "-"+o;
+    }
+
+    function RenderResults(rs){
+        for (i in rs){
+            var r = rs[i];  
+            div = $("<div>")
+                .addClass("resultrow")
+                //.slideToggle(300)
+                //.delay(2500)
+                //.slideToggle(300)
+         
+
+                ;
+            r1 = $("<div>")
+                .addClass("r1")
+                .addClass("color-primary-2")
+                .addClass("resultitem");
+            r2 = $("<div>")
+                .addClass("r2")
+                .addClass("resultitem")
+                .addClass("color-secondary-2-2");
+            namediv = $("<div>").html(r.name)
+                .addClass("resultitem")
+                .addClass("name");
+
+            switch (r.winner) {
+                case 0:
+                div.addClass ("color-complement-0");
+                r1.html ("Draw!");
+                r2.html ("Draw!");
+                break;
+                case 1:
+                r1.html ( formattime(r.e2.elapsedtime - r.e1.elapsedtime));
+                div.addClass ("color-primary-0")
+                
+                break;
+                case 2:
+                r2.html (formattime(r.e1.elapsedtime - r.e2.elapsedtime));
+                div.addClass ("color-secondary-2-0")
+               
+                break;
+            }
+            div.append (r1);
+            div.append (namediv);
+            div.append (r2);
+
+            $("body").prepend(div);  
+            
+
+        }
+    }
+   
+</script>
+<script src="dave.efforts.js"></script>
+<script src="pete.efforts.js"></script>
+
+<link href="styles.css" rel="stylesheet">
+<style>
+    #stats { display : flex; flex-wrap: wrap;}
+    .stat_graph { width: 400px}
+</style>
+
+
+  
+</head>
+
+    <body>
+        <script>
+            GetEffortsFromRival(dave);
+            ProcessRivals(dave, pete);
+            RenderResults(results);
+            $('html,body').scrollTop(0);
+        </script>
+    </body>
+</html>
+
